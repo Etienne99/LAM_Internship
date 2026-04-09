@@ -66,3 +66,25 @@ def extract_pattern(sequence, pattern):
     """
     match = pattern.search(sequence)
     return match.group(0) if match else None
+
+def calculate_lambda_corr(wl, rv_list):
+    """
+    Calculates the corrected wavelength for a measured wavelength and radial velocity.
+    
+    Parameters
+    ----------
+        wl: np.array
+            Array of size N containing the wavelengths.
+        rv_list: array
+            Array of size M containing RV measures. Units must be m/s.
+    
+    Returns
+    -------
+        np.array
+            2D array of M rows and N columns.
+            Each row contains a list of corrected wavelengths for a certain RV value.
+    """
+    lambda_corr  = []
+    for rv in rv_list:
+        lambda_corr.append(wl * (1 - rv / 3e8))  # corrected wavelength, same units as wl
+    return np.array(lambda_corr)
