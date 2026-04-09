@@ -1,0 +1,68 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from collections import OrderedDict
+
+def RV_jup(t, A_0, A_1, P, phi, C):
+    """
+    Model for the radial velocity of the Sun due to Jupiter's
+    gravity as a sinusoid.
+
+    Parameters
+    ----------
+        t: numpy.array
+            Time series.
+        A_0: float
+            Initial amplitude.
+        A_1: float
+            Amplitude drift.
+        P: float
+            Period of the sinusoid.
+        phi: float
+            Phase offset.
+        C: float
+            Vertical shift.
+
+    Returns
+    -------
+        np.array
+            Sinusoidal function.
+    """
+    return (A_0 + A_1 * t) * np.sin(2 * np.pi * t / P + phi) + C
+
+def double_centering(matrix):
+    """ 
+    Applies double centering to a given matrix.
+    
+    Parameters
+    ----------
+        matrix: numpy.array
+            Any 2D array.
+
+    Returns
+    -------
+        X: numpy.array
+            Result of double centering of the original matrix.
+    """
+    matrix_centered = matrix - np.mean(matrix, axis=1, keepdims=True)
+    matrix_centered = matrix_centered - np.mean(matrix_centered, axis=0, keepdims=True)
+    return matrix_centered
+
+def extract_pattern(sequence, pattern):
+    """
+    Finds a certain pattern inside a string.
+    Used to extract time string from a HARPS file name.
+
+    Parameters
+    ----------
+        sequence: str
+            Any string.
+        pattern: re.Pattern
+            Pattern to search inside the string.
+
+    Returns
+    -------
+        str
+            String inside sequence that matches the pattern.
+    """
+    match = pattern.search(sequence)
+    return match.group(0) if match else None
