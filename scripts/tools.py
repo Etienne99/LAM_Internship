@@ -88,3 +88,31 @@ def calculate_lambda_corr(wl, rv_list):
     for rv in rv_list:
         lambda_corr.append(wl * (1 - rv / 3e8))  # corrected wavelength, same units as wl
     return np.array(lambda_corr)
+
+def calculate_rv(wl, S_0, S_k, C_0):
+    """
+    Calculates the radial velocity of a certain spectrum with respect to a reference spectrum.
+    Both spectra are associated to the same wavelength array.
+
+    Parameters
+    ----------
+        wl: np.array
+            Array containing the wavelengths.
+        S_0: np.array
+            Array containing the reference spectrum.
+        S_k: np.array
+            Array containing the observed spectrum.
+        C_0: float
+            Constant to account for normalized spectrum.
+    
+    Returns
+    -------
+        float
+            Radial velocity of the observed spectrum.
+    """
+
+    c = 3e8  # m/s
+    dS_0 = np.gradient(S_0, wl)
+    num = sum((S_k - S_0) / (dS_0 * wl / c) * (dS_0)**2 * wl**2 / (C_0 + S_0))
+    den = sum(dS_0 * wl**2 / (C_0 + S_0))
+    return num / den
