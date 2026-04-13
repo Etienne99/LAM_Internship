@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from collections import OrderedDict
+from astropy import units as u
 
 def RV_jup(t, A_0, A_1, P, phi, C):
     """
