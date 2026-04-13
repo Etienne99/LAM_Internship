@@ -103,7 +103,7 @@ def calculate_rv(wl, S_0, S_k, C_0):
         S_k: np.array
             Array containing the observed spectrum.
         C_0: float
-            Constant to account for normalized spectrum.
+            Continuum level constant.
     
     Returns
     -------
@@ -114,5 +114,5 @@ def calculate_rv(wl, S_0, S_k, C_0):
     c = 3e8  # m/s
     dS_0 = np.gradient(S_0, wl)
     num = sum((S_k - S_0) / (dS_0 * wl / c) * (dS_0)**2 * wl**2 / (C_0 + S_0))
-    den = sum(dS_0 * wl**2 / (C_0 + S_0))
+    den = sum(dS_0**2 * wl**2 / (C_0 + S_0))
     return num / den
