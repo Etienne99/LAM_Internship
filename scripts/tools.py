@@ -116,4 +116,3 @@ def calculate_rv(wl, S_0, S_k, C_0):
     num = sum((S_k - S_0) * wl * dS_0 / (S_0 + C_0))
     den = sum(wl**2 * dS_0**2 / (S_0 + C_0))
     return c * num / den
-
