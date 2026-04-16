@@ -113,6 +113,6 @@ def calculate_rv(wl, S_0, S_k, C_0):
 
     c = 3e8  # m/s
     dS_0 = np.gradient(S_0, wl)
-    num = sum((S_k - S_0) / (dS_0 * wl / c) * (dS_0)**2 * wl**2 / (C_0 + S_0))
-    den = sum(dS_0**2 * wl**2 / (C_0 + S_0))
-    return num / den
+    num = sum((S_k - S_0) * wl * dS_0 / (S_0 + C_0))
+    den = sum(wl**2 * dS_0**2 / (S_0 + C_0))
+    return c * num / den
