@@ -1,6 +1,6 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from astropy import units as u
+from tqdm import tqdm
+from sklearn.decomposition import PCA
 
 def RV_jup(t, A_0, A_1, P, phi, C):
     """
@@ -116,3 +116,46 @@ def calculate_rv(wl, S_0, S_k, C_0):
     num = sum((S_k - S_0) * wl * dS_0 / (S_0 + C_0))
     den = sum(wl**2 * dS_0**2 / (S_0 + C_0))
     return c * num / den
+
+def calculate_pca_significance(N_r, N_c, spectra, sigma):
+    """
+    Calculates the significance of the principal components.
+
+    Parameters
+    ----------
+    N_r: int
+        Number of realizations.
+    N_c: int
+        Number of principal components.
+    spectra: np.ndarray
+        2D array where each row is a spectrum.
+
+    Returns
+    -------
+    stats: np.array
+        Array of tuples. The first element of each tuple is the average maximum value
+        of the dot product between the components obtained from the original matrix and the noisy ones.
+        The second element of each tuple is the standard deviation
+        of the dot product between the components obtained from the original matrix and the noisy ones.
+        
+
+    """
+    pca_spec = PCA(n_components=N_c)  # create PCA object
+    pca_spec.fit_transform(spectra)  # apply PCA to the original matrix
+    comps = pca_spec.components_.astype(np.float32)
+
+    simi_all = np.empty((N_r, N_c, N_c), dtype=np.float32)  # N_r squared matrices of N_c x N_c
+
+    for i in tqdm(range(N_r)):  # iterate over realizations
+        spectra_noisy = spectra + np.random.normal(0, sigma, spectra.shape)  # add gaussian noise to the original data
+
+        pca_noisy = PCA(n_components=N_c, svd_solver="randomized")  # apply PCA to the noisy matrix
+        pca_noisy.fit(spectra_noisy)
+
+        comps_noisy = pca_noisy.components_  # save the loadings
+
+        simi_all[i] = comps @ comps_noisy.T  # save dot product between original and noisy loadings
+    
+    maxes = np.array([np.amax(s, axis=1) for s in simi_all])  # max of each row of each realization
+    stats = np.array([(np.average(s), np.std(s)) for s in maxes.T])  # list of max mean and std for each PC: [(max_avg_1, max_std_1), (max_avg_2, max_std_2), ..., (max_avg_n, max_std_n)]
+    return stats
