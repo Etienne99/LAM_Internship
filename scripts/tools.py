@@ -159,3 +159,28 @@ def calculate_pca_significance(N_r, N_c, spectra, sigma):
     maxes = np.array([np.amax(s, axis=1) for s in simi_all])  # max of each row of each realization
     stats = np.array([(np.average(s), np.std(s)) for s in maxes.T])  # list of max mean and std for each PC: [(max_avg_1, max_std_1), (max_avg_2, max_std_2), ..., (max_avg_n, max_std_n)]
     return stats
+
+def harvey(f, A, tau, alpha, W):
+    """
+    Calculates the Harvey function (https://ui.adsabs.harvard.edu/abs/1985ESASP.235..199H/abstract).
+
+    Parameters
+    ----------
+    f: float or np.ndarray
+        Frequency.
+    A: float
+        Amplitude (power level).
+    tau: float
+        Characteristic timestale.
+    alpha: float
+        Slope of the power law.
+    W: float
+        White noise.
+
+    Returns
+    -------
+    float or np.ndarray
+        Harvey function for the given values.
+    
+    """
+    return A / (1.0 + (2*np.pi*f*tau)**alpha) + W
