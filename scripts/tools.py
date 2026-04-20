@@ -171,7 +171,7 @@ def harvey(nu, a, b, c, d):
     a: float
         Total energy.
     b: float
-        Characteristic frequency.
+        Turnover frequency.
     c: float
         Slope of the power law.
     d: float
