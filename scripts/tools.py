@@ -202,7 +202,7 @@ def calculate_CCF(S_i, S_0):
     float:
         Result of the cross-correlation.
     """
-    return S_i * S_0 / (np.linalg.norm(S_i) * np.linalg.norm(S_0))
+    return sum(S_i * S_0)
 
 def gaussian(x, A, mu, sigma, C):
     """
