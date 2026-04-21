@@ -185,3 +185,21 @@ def harvey(nu, a, b, c, d):
     """
     f = np.pi / c / np.sin(np.pi / c)  # normalization factor
     return a / (f * b) / (1+ (nu / b)**c) + d
+
+def calculate_CCF(S_i, S_0):
+    """
+    Calculates the cross-correlation function between a measured and a reference spectrum.
+
+    Parameters
+    ----------
+    S_i: np.ndarray
+        Measured spectrum
+    S_0: np.ndarray
+        Reference spectrum
+    
+    Returns
+    -------
+    float:
+        Result of the cross-correlation.
+    """
+    return sum(S_i * S_0 / (np.linalg.norm(S_i) * np.linalg.norm(S_0)))
