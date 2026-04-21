@@ -202,4 +202,28 @@ def calculate_CCF(S_i, S_0):
     float:
         Result of the cross-correlation.
     """
-    return sum(S_i * S_0 / (np.linalg.norm(S_i) * np.linalg.norm(S_0)))
+    return S_i * S_0 / (np.linalg.norm(S_i) * np.linalg.norm(S_0))
+
+def gaussian(x, A, mu, sigma, C):
+    """
+    Gaussian function with independent amplitude and position on the y-axis.
+    
+    Parameters
+    ----------
+    x: float or np.ndarray
+        Input data.
+    A: float
+        Height of the curve's peak (amplitude).
+    mu: float
+        Position of the center of the peak.
+    sigma: float
+        Standard deviation.
+    C: float
+        Position coefficient.
+    
+    Returns
+    -------
+    float or np.ndarray
+        Gaussian function.
+    """
+    return A * np.exp(-(x - mu)**2 / (2 * sigma**2)) + C
