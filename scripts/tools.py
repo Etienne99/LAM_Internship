@@ -117,7 +117,7 @@ def calculate_rv(wl, S_0, S_k, C_0):
     den = sum(wl**2 * dS_0**2 / (S_0 + C_0))
     return c * num / den
 
-def calculate_pca_significance(N_r, N_c, spectra, sigma):
+def calculate_pca_significance(N_r, N_c, spectra, sigma, bar=True):
     """
     Calculates the significance of the principal components.
 
