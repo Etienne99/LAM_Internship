@@ -2,6 +2,7 @@ import numpy as np
 from tqdm import tqdm
 from sklearn.decomposition import PCA
 
+
 def RV_jup(t, A_0, A_1, P, phi, C):
     """
     Model for the radial velocity of the Sun due to Jupiter's
@@ -9,7 +10,7 @@ def RV_jup(t, A_0, A_1, P, phi, C):
 
     Parameters
     ----------
-        t: numpy.array
+        t: numpy.ndarray
             Time series.
         A_0: float
             Initial amplitude.
@@ -29,23 +30,25 @@ def RV_jup(t, A_0, A_1, P, phi, C):
     """
     return (A_0 + A_1 * t) * np.sin(2 * np.pi * t / P + phi) + C
 
+
 def double_centering(matrix):
     """ 
     Applies double centering to a given matrix.
     
     Parameters
     ----------
-        matrix: numpy.array
+        matrix: numpy.ndarray
             Any 2D array.
 
     Returns
     -------
-        X: numpy.array
+        X: numpy.ndarray
             Result of double centering of the original matrix.
     """
     matrix_centered = matrix - np.mean(matrix, axis=1, keepdims=True)
     matrix_centered = matrix_centered - np.mean(matrix_centered, axis=0, keepdims=True)
     return matrix_centered
+
 
 def extract_pattern(sequence, pattern):
     """
@@ -67,20 +70,21 @@ def extract_pattern(sequence, pattern):
     match = pattern.search(sequence)
     return match.group(0) if match else None
 
+
 def calculate_lambda_corr(wl, rv_list):
     """
     Calculates the corrected wavelength for a measured wavelength and radial velocity.
     
     Parameters
     ----------
-        wl: np.array
+        wl: numpy.ndarray
             Array of size N containing the wavelengths.
-        rv_list: array
+        rv_list: numpy.ndarray
             Array of size M containing RV measures. Units must be m/s.
     
     Returns
     -------
-        np.array
+        numpy.ndarray
             2D array of M rows and N columns.
             Each row contains a list of corrected wavelengths for a certain RV value.
     """
@@ -89,6 +93,7 @@ def calculate_lambda_corr(wl, rv_list):
         lambda_corr.append(wl * (1 - rv / 3e8))  # corrected wavelength, same units as wl
     return np.array(lambda_corr)
 
+
 def calculate_rv(wl, S_0, S_k, C_0):
     """
     Calculates the radial velocity of a certain spectrum with respect to a reference spectrum.
@@ -96,11 +101,11 @@ def calculate_rv(wl, S_0, S_k, C_0):
 
     Parameters
     ----------
-        wl: np.array
+        wl: numpy.ndarray
             Array containing the wavelengths.
-        S_0: np.array
+        S_0: numpy.ndarray
             Array containing the reference spectrum.
-        S_k: np.array
+        S_k: numpy.ndarray
             Array containing the observed spectrum.
         C_0: float
             Continuum level constant.
@@ -117,6 +122,7 @@ def calculate_rv(wl, S_0, S_k, C_0):
     den = sum(wl**2 * dS_0**2 / (S_0 + C_0))
     return c * num / den
 
+
 def calculate_pca_significance(N_r, N_c, spectra, sigma, bar=True):
     """
     Calculates the significance of the principal components.
@@ -127,14 +133,14 @@ def calculate_pca_significance(N_r, N_c, spectra, sigma, bar=True):
         Number of realizations.
     N_c: int
         Number of principal components.
-    spectra: np.ndarray
+    spectra: numpy.ndarray
         2D array where each row is a spectrum.
     bar: bool
         True to show progress bar.
 
     Returns
     -------
-    stats: np.array
+    stats: numpy.ndarray
         Array of tuples. The first element of each tuple is the average maximum value
         of the dot product between the components obtained from the original matrix and the noisy ones.
         The second element of each tuple is the standard deviation
@@ -173,13 +179,14 @@ def calculate_pca_significance(N_r, N_c, spectra, sigma, bar=True):
     stats = np.array([(np.average(s), np.std(s)) for s in maxes.T])  # list of max mean and std for each PC: [(max_avg_1, max_std_1), (max_avg_2, max_std_2), ..., (max_avg_n, max_std_n)]
     return stats
 
+
 def harvey(nu, a, b, c, d):
     """
     Calculates the Harvey function (https://ui.adsabs.harvard.edu/abs/1985ESASP.235..199H/abstract).
 
     Parameters
     ----------
-    nu: float or np.ndarray
+    nu: float or numpy.ndarray
         Frequency.
     a: float
         Total energy.
@@ -192,12 +199,13 @@ def harvey(nu, a, b, c, d):
 
     Returns
     -------
-    float or np.ndarray
+    float or numpy.ndarray
         Harvey function for the given values.
     
     """
     f = np.pi / c / np.sin(np.pi / c)  # normalization factor
     return a / (f * b) / (1+ (nu / b)**c) + d
+
 
 def calculate_CCF(S_i, S_0):
     """
@@ -205,9 +213,9 @@ def calculate_CCF(S_i, S_0):
 
     Parameters
     ----------
-    S_i: np.ndarray
+    S_i: numpy.ndarray
         Measured spectrum
-    S_0: np.ndarray
+    S_0: numpy.ndarray
         Reference spectrum
     
     Returns
@@ -217,13 +225,14 @@ def calculate_CCF(S_i, S_0):
     """
     return sum(S_i * S_0)
 
+
 def gaussian(x, A, mu, sigma, C):
     """
     Gaussian function with independent amplitude and position on the y-axis.
     
     Parameters
     ----------
-    x: float or np.ndarray
+    x: float or numpy.ndarray
         Input data.
     A: float
         Height of the curve's peak (amplitude).
@@ -236,7 +245,33 @@ def gaussian(x, A, mu, sigma, C):
     
     Returns
     -------
-    float or np.ndarray
+    float or numpy.ndarray
         Gaussian function.
     """
     return A * np.exp(-(x - mu)**2 / (2 * sigma**2)) + C
+
+
+def calculate_lambda_vr(wl, v, c=3e8):
+    """
+    Calculates Doppler-shifted wavelength as explained in Pepe et al. (2002).
+    https://ui.adsabs.harvard.edu/abs/2002A%26A...388..632P/abstract
+
+    Parameters
+    ----------
+    wl: float or numpy.ndarray
+        Wavelength.
+    v: float or numpy.ndarray
+        Velocity. Must have the same shape as wl and the same units as c.
+    c: float
+        Speed of light. 300000 m/s by default.
+    
+    Returns
+    -------
+    float or numpy.ndarray
+        Doppler-shifted wavelength, same units as wl.
+    """
+
+    return wl * np.sqrt((1 - v / c) / (1 + v / c))
+
+def cross_correlate():
+    pass
