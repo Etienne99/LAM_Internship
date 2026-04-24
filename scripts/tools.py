@@ -129,6 +129,8 @@ def calculate_pca_significance(N_r, N_c, spectra, sigma, bar=True):
         Number of principal components.
     spectra: np.ndarray
         2D array where each row is a spectrum.
+    bar: bool
+        True to show progress bar.
 
     Returns
     -------
@@ -146,15 +148,26 @@ def calculate_pca_significance(N_r, N_c, spectra, sigma, bar=True):
 
     simi_all = np.empty((N_r, N_c, N_c), dtype=np.float32)  # N_r squared matrices of N_c x N_c
 
-    for i in tqdm(range(N_r)):  # iterate over realizations
-        spectra_noisy = spectra + np.random.normal(0, sigma, spectra.shape)  # add gaussian noise to the original data
+    if bar:
+        for i in tqdm(range(N_r)):  # iterate over realizations
+            spectra_noisy = spectra + np.random.normal(0, sigma, spectra.shape)  # add gaussian noise to the original data
 
-        pca_noisy = PCA(n_components=N_c, svd_solver="randomized")  # apply PCA to the noisy matrix
-        pca_noisy.fit(spectra_noisy)
+            pca_noisy = PCA(n_components=N_c, svd_solver="randomized")  # apply PCA to the noisy matrix
+            pca_noisy.fit(spectra_noisy)
 
-        comps_noisy = pca_noisy.components_  # save the loadings
+            comps_noisy = pca_noisy.components_  # save the loadings
 
-        simi_all[i] = comps @ comps_noisy.T  # save dot product between original and noisy loadings
+            simi_all[i] = comps @ comps_noisy.T  # save dot product between original and noisy loadings
+    else:
+        for i in range(N_r):  # iterate over realizations
+            spectra_noisy = spectra + np.random.normal(0, sigma, spectra.shape)  # add gaussian noise to the original data
+
+            pca_noisy = PCA(n_components=N_c, svd_solver="randomized")  # apply PCA to the noisy matrix
+            pca_noisy.fit(spectra_noisy)
+
+            comps_noisy = pca_noisy.components_  # save the loadings
+
+            simi_all[i] = comps @ comps_noisy.T  # save dot product between original and noisy loadings
     
     maxes = np.array([np.amax(s, axis=1) for s in simi_all])  # max of each row of each realization
     stats = np.array([(np.average(s), np.std(s)) for s in maxes.T])  # list of max mean and std for each PC: [(max_avg_1, max_std_1), (max_avg_2, max_std_2), ..., (max_avg_n, max_std_n)]
