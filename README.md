@@ -9,7 +9,7 @@
     * PCA applied to a time series of simulated spectra (range from 6173.10077 &Aring; to 6173.599098 &Aring;, i.e. just one absorption line) with doppler correction to the wavelength.
 
 - pca_sims2.ipynb:
-    * PCA applied to simulated spectra. We take out the projection over the velocity vector. To do that, we first represent each spectrum as a slightly shifted the reference spectrum:
+    * PCA applied to simulated spectra. We take out the projection over the velocity vector. To do that, we first represent each spectrum as a slightly shifted reference spectrum:
     
         <img src="images/equations/eq1.png" width="300">
 
