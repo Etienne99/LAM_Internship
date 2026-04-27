@@ -5,7 +5,9 @@
 - pca_sims2.ipynb:
     * PCA applied to simulated spectra. We take out the projection over the velocity vector. To do that, we first represent each spectrum as a small shift in the reference spectrum:
     
-        $$ S_i = S_0(\lambda + \Delta \lambda) \cong S_0(\lambda) + \frac{dS_0(\lambda)}{d\lambda}\Delta \lambda $$
+        $$
+        S_i = S_0(\lambda + \Delta \lambda) \cong S_0(\lambda) + \frac{dS_0(\lambda)}{d\lambda}\Delta \lambda
+        $$
 
         Using the Doppler shift formula $\Delta v / c = \Delta \lambda / \lambda$, we get:
 
