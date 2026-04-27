@@ -129,22 +129,22 @@ def calculate_pca_significance(N_r, N_c, spectra, sigma, bar=True):
 
     Parameters
     ----------
-    N_r: int
-        Number of realizations.
-    N_c: int
-        Number of principal components.
-    spectra: numpy.ndarray
-        2D array where each row is a spectrum.
-    bar: bool
-        True to show progress bar.
+        N_r: int
+            Number of realizations.
+        N_c: int
+            Number of principal components.
+        spectra: numpy.ndarray
+            2D array where each row is a spectrum.
+        bar: bool
+            True to show progress bar.
 
     Returns
     -------
-    stats: numpy.ndarray
-        Array of tuples. The first element of each tuple is the average maximum value
-        of the dot product between the components obtained from the original matrix and the noisy ones.
-        The second element of each tuple is the standard deviation
-        of the dot product between the components obtained from the original matrix and the noisy ones.
+        stats: numpy.ndarray
+            Array of tuples. The first element of each tuple is the average maximum value
+            of the dot product between the components obtained from the original matrix and the noisy ones.
+            The second element of each tuple is the standard deviation
+            of the dot product between the components obtained from the original matrix and the noisy ones.
         
 
     """
@@ -186,21 +186,21 @@ def harvey(nu, a, b, c, d):
 
     Parameters
     ----------
-    nu: float or numpy.ndarray
-        Frequency.
-    a: float
-        Total energy.
-    b: float
-        Turnover frequency.
-    c: float
-        Slope of the power law.
-    d: float
-        White noise.
+        nu: float or numpy.ndarray
+            Frequency.
+        a: float
+            Total energy.
+        b: float
+            Turnover frequency.
+        c: float
+            Slope of the power law.
+        d: float
+            White noise.
 
     Returns
     -------
-    float or numpy.ndarray
-        Harvey function for the given values.
+        float or numpy.ndarray
+            Harvey function for the given values.
     
     """
     f = np.pi / c / np.sin(np.pi / c)  # normalization factor
@@ -213,15 +213,15 @@ def calculate_CCF(S_i, S_0):
 
     Parameters
     ----------
-    S_i: numpy.ndarray
-        Measured spectrum
-    S_0: numpy.ndarray
-        Reference spectrum
+        S_i: numpy.ndarray
+            Measured spectrum.
+        S_0: numpy.ndarray
+            Reference spectrum.
     
     Returns
     -------
-    float:
-        Result of the cross-correlation.
+        float:
+            Result of the cross-correlation.
     """
     return sum(S_i * S_0)
 
@@ -232,21 +232,21 @@ def gaussian(x, A, mu, sigma, C):
     
     Parameters
     ----------
-    x: float or numpy.ndarray
-        Input data.
-    A: float
-        Height of the curve's peak (amplitude).
-    mu: float
-        Position of the center of the peak.
-    sigma: float
-        Standard deviation.
-    C: float
-        Position coefficient.
+        x: float or numpy.ndarray
+            Input data.
+        A: float
+            Height of the curve's peak (amplitude).
+        mu: float
+            Position of the center of the peak.
+        sigma: float
+            Standard deviation.
+        C: float
+            Position coefficient.
     
     Returns
     -------
-    float or numpy.ndarray
-        Gaussian function.
+        float or numpy.ndarray
+            Gaussian function.
     """
     return A * np.exp(-(x - mu)**2 / (2 * sigma**2)) + C
 
@@ -258,20 +258,39 @@ def calculate_lambda_vr(wl, v, c=3e8):
 
     Parameters
     ----------
-    wl: float or numpy.ndarray
-        Wavelength.
-    v: float or numpy.ndarray
-        Velocity. Must have the same shape as wl and the same units as c.
-    c: float
-        Speed of light. 300000 m/s by default.
+        wl: float or numpy.ndarray
+            Wavelength.
+        v: float or numpy.ndarray
+            Velocity. Must have the same shape as wl and the same units as c.
+        c: float
+            Speed of light. 300000 m/s by default.
     
     Returns
     -------
-    float or numpy.ndarray
-        Doppler-shifted wavelength, same units as wl.
+        float or numpy.ndarray
+            Doppler-shifted wavelength, same units as wl.
     """
 
     return wl * np.sqrt((1 - v / c) / (1 + v / c))
 
-def cross_correlate():
-    pass
+def cross_correlate(S_j, shifted_mask):
+    """
+    Calculates the Cross-Correlation Function between a spectrum and
+    a series of shifted spectra.
+
+    Parameters
+    ----------
+        S_j: numpy.ndarray
+            1-dimensional array that represents an observed spectrum.
+        shifted_mask: numpy.ndarray
+            1-dimensional that represents the reference spectrum (mask),
+            shifted due to the effect of a certain value of radial velocity.
+    
+    Returns:
+    --------
+        float
+            The cross correlation function between the observed spectrum and the shifted mask.
+
+    """
+
+    return S_j * shifted_mask / (np.linalg.norm(S_j) * np.linalg.norm(shifted_mask))
