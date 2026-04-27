@@ -3,7 +3,7 @@
 - pca_dace.ipynb:
     * PCA applied to data obtained from HARPS-N using dace_query. The script to download the files is available as a raw cell if the files are not in the repository.
 
-- RV_jupiter_7_4.ipynb: backup of pca_dace.ipynb from April 7th 2026.
+- RV_jupiter_7_4.ipynb: backup to pca_dace.ipynb from April 7th 2026.
 
 - pca_sims.ipynb: 
     * PCA applied to a time series of simulated spectra (range from 6173.10077 &Aring; to 6173.599098 &Aring;, i.e. just one absorption line) with doppler correction to the wavelength.
