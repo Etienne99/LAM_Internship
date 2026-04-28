@@ -204,7 +204,7 @@ def harvey(nu, a, b, c, d):
     
     """
     f = np.pi / c / np.sin(np.pi / c)  # normalization factor
-    return a / (f * b) / (1+ (nu / b)**c) + d
+    return a / (f * b) / (1 + (nu / b)**c) + d
 
 
 def calculate_CCF(S_i, S_0):
