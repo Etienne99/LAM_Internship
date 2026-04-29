@@ -273,6 +273,7 @@ def calculate_lambda_vr(wl, v, c=3e8):
 
     return wl * np.sqrt((1 - v / c) / (1 + v / c))
 
+
 def cross_correlate(S_j, shifted_mask):
     """
     Calculates the Cross-Correlation Function between a spectrum and
@@ -294,3 +295,33 @@ def cross_correlate(S_j, shifted_mask):
     """
 
     return S_j * shifted_mask / (np.linalg.norm(S_j) * np.linalg.norm(shifted_mask))
+
+
+def calculate_periodogram(x, y):
+    """
+    Calculates the periodogram of the function y(x).
+
+    Parameters
+    ----------
+        x: np.ndarray
+            Independent variable. Needs to be regularly spaced.
+        y: np.ndarray
+            Dependent variable (function of x). Needs to be regularly spaced.
+    
+    Returns
+    -------
+        ft: np.ndarray
+            Fast Fourier Transform of y.
+        ps: np.ndarray
+            Normalized power spectrum of y.
+        freqs: np.ndarray
+            Corresponding frequencies to the Fourier Transform.
+    """
+    N = len(y)
+    dx = x[1] - x[0]
+    
+    ft = np.fft.fft(y)
+    ps = np.abs(ft)**2 / N
+    freqs = np.fft.fftfreq(N, dx)
+
+    return ft, ps, freqs
