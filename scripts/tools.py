@@ -145,8 +145,6 @@ def calculate_pca_significance(N_r, N_c, spectra, sigma, bar=True):
             of the dot product between the components obtained from the original matrix and the noisy ones.
             The second element of each tuple is the standard deviation
             of the dot product between the components obtained from the original matrix and the noisy ones.
-        
-
     """
     pca_spec = PCA(n_components=N_c)  # create PCA object
     pca_spec.fit_transform(spectra)  # apply PCA to the original matrix
