@@ -96,7 +96,7 @@ def calculate_lambda_corr(wl, rv_list):
 
 def calculate_rv(wl, S_0, S_k, C_0):
     """
-    Calculates the radial velocity of a certain spectrum with respect to a reference spectrum.
+    Template matching. Calculates the radial velocity of a certain spectrum with respect to a reference spectrum.
     Both spectra are associated to the same wavelength array.
 
     Parameters
@@ -325,3 +325,33 @@ def calculate_periodogram(x, y):
     freqs = np.fft.fftfreq(N, dx)
 
     return ft, ps, freqs
+
+def subtract_v(wl, spectra_matrix, c=3e8):
+    """
+    Take out the projection over the velocity vector from a matrix of spectra,
+    assuming that each spectrum is the same as the mean spectrum centered around
+    a different wavelength.
+    Detailed explanation in the readme: https://github.com/Etienne99/LAM_Internship/blob/master/README.md.
+
+    Parameters
+    ----------
+        wl: numpy.ndarray
+            1-dimensional array containing the wavelength values.
+        spectra_matrix: numpy.ndarray
+            2-dimensional array where each row is a spectrum.
+        c: float
+            The speed of light in vacuum. Default is 3e8 m/s.
+    
+    Returns
+    -------
+        S_f: numpy.ndarray
+            2-dimensional array, where each row is a spectrum after having subtracted
+            the projection over the velocity vector.
+    """
+    mean_spec = np.mean(spectra_matrix, axis=0)  # calculate mean spectrum (i.e. the mean flux for each wl)
+    d_S0      = np.gradient(mean_spec, wl)  # derivative of the mean spectrum
+
+    S_t       = np.array([i - mean_spec for i in spectra_matrix])  # subtract the mean spectrum from each row of the spectra matrix
+    v         = d_S0 * wl / c
+    S_f       = np.array([(i - np.dot(v, i)) * v / np.linalg.norm(v)**2 for i in S_t])  # take out projection over the velocity vector
+    return S_f
