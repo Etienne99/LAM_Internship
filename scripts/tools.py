@@ -345,6 +345,8 @@ def subtract_v(wl, spectra_matrix, c=3e8):
         S_f: numpy.ndarray
             2-dimensional array, where each row is a spectrum after having subtracted
             the projection over the velocity vector.
+        v: numpy.ndarray
+            Velocity vector.
     """
     mean_spec = np.mean(spectra_matrix, axis=0)  # calculate mean spectrum (i.e. the mean flux for each wl)
     d_S0      = np.gradient(mean_spec, wl)  # derivative of the mean spectrum
@@ -352,4 +354,4 @@ def subtract_v(wl, spectra_matrix, c=3e8):
     S_t       = np.array([i - mean_spec for i in spectra_matrix])  # subtract the mean spectrum from each row of the spectra matrix
     v         = d_S0 * wl / c
     S_f       = np.array([(i - np.dot(v, i)) * v / np.linalg.norm(v)**2 for i in S_t])  # take out projection over the velocity vector
-    return S_f
+    return S_f, v
