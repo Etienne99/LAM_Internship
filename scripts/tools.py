@@ -178,7 +178,7 @@ def calculate_pca_significance(N_r, N_c, spectra, sigma, bar=True):
     return stats
 
 
-def harvey(nu, a, b, c, d):
+def harvey(params, nu):
     """
     Calculates the Harvey function (https://ui.adsabs.harvard.edu/abs/1985ESASP.235..199H/abstract).
 
@@ -186,14 +186,16 @@ def harvey(nu, a, b, c, d):
     ----------
         nu: float or numpy.ndarray
             Frequency.
-        a: float
-            Total energy.
-        b: float
-            Turnover frequency.
-        c: float
-            Slope of the power law.
-        d: float
-            White noise.
+        params: iterable
+            Parameters of the function. These are:
+                a: float
+                    Total energy.
+                b: float
+                    Turnover frequency.
+                c: float
+                    Slope of the power law.
+                d: float
+                    White noise.
 
     Returns
     -------
@@ -201,6 +203,7 @@ def harvey(nu, a, b, c, d):
             Harvey function for the given values.
     
     """
+    a, b, c, d = params
     f = np.pi / c / np.sin(np.pi / c)  # normalization factor
     return a / (f * b) / (1 + (nu / b)**c) + d
 

@@ -1,0 +1,47 @@
+Summary of posterior statistics:
+
+Parameter estimates:
+ Median         Mean           Max-posterior  Mode           Parameter
+ 2.6461639e+00  2.6462105e+00  2.6473407e+00  2.6396730e+00  param01
+ 0.0000000e+00  0.0000000e+00  0.0000000e+00  0.0000000e+00  param02
+
+ Std_deviation  Parameter
+ 2.3182361e-02  param01
+ 0.0000000e+00  param02
+
+Central quantile credible intervals:
+ 2sigma_low     1sigma_low     1sigma_up      2sigma_up      Parameter
+ 2.5988531e+00  2.6233506e+00  2.6691400e+00  2.6878131e+00  param01
+ 0.0000000e+00  0.0000000e+00  0.0000000e+00  0.0000000e+00  param02
+
+Highest-posterior-density credible intervals:
+ 2sigma_low     1sigma_low     1sigma_up      2sigma_up      Parameter
+ 2.5975069e+00  2.6255295e+00  2.6724982e+00  2.6888888e+00  param01
+ 0.0000000e+00  0.0000000e+00  0.0000000e+00  0.0000000e+00  param02
+
+
+LaTeX format
+Median and 1sigma central-quantile statistics
+param01  &  $2.646^{+0.023}_{-0.023}$
+param02  &  $0.0$
+
+Median and 2sigma central-quantile statistics
+param01  &  $2.646^{+0.042}_{-0.047}$
+param02  &  $0.0$
+
+Marginal max_posterior (mode) and 1sigma-HPD statistics
+param01  &  $2.640^{+0.033}_{-0.014}$
+param02  &  $0.0$
+
+Marginal max_posterior (mode) and 2sigma-HPD statistics
+param01  &  $2.640^{+0.049}_{-0.042}$
+param02  &  $0.0$
+
+
+Best-parameter's chi-squared:       71.9660
+Best-parameter's -2*log(posterior): 71.9660
+Bayesian Information Criterion:     75.8781
+Reduced chi-squared:                 1.4687
+Standard deviation of residuals:  1.14686
+
+
