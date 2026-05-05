@@ -319,10 +319,11 @@ def calculate_periodogram(x, y):
     dx = x[1] - x[0]
     
     ft = np.fft.fft(y)
-    ps = np.abs(ft)**2 / N
+    ps = np.abs(ft)**2 * dx / N
     freqs = np.fft.fftfreq(N, dx)
 
     return ft, ps, freqs
+
 
 def subtract_v(wl, spectra_matrix, c=3e8):
     """
