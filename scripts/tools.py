@@ -205,7 +205,8 @@ def harvey(params, nu):
     f = np.pi / c / np.sin(np.pi / c)  # normalization factor
     return a / (f * b) / (1 + (nu / b)**c) + d
 
-def harvey_unpacked(params, nu):
+
+def harvey_unpacked(nu, a, b, c, d):
     """
     Calculates the Harvey function (https://ui.adsabs.harvard.edu/abs/1985ESASP.235..199H/abstract).
 
@@ -213,26 +214,23 @@ def harvey_unpacked(params, nu):
     ----------
         nu: float or numpy.ndarray
             Frequency.
-        params: iterable
-            Parameters of the function. These are:
-                a: float
-                    Total energy.
-                b: float
-                    Turnover frequency.
-                c: float
-                    Slope of the power law.
-                d: float
-                    White noise.
+        a: float
+            Total energy.
+        b: float
+            Turnover frequency.
+        c: float
+            Slope of the power law.
+        d: float
+            White noise.
 
     Returns
     -------
         float or numpy.ndarray
             Harvey function for the given values.
-    
     """
-    a, b, c, d = params
     f = np.pi / c / np.sin(np.pi / c)  # normalization factor
     return a / (f * b) / (1 + (nu / b)**c) + d
+
 
 def calculate_CCF(S_i, S_0):
     """
