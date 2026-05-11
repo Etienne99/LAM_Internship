@@ -18,11 +18,11 @@
         <img src="images/equations/eq2.png" width="200">
 
         Where $S_i$ is a simulated spectrum and $S_0$ is the reference spectrum (mask).
-        We define $S(t) = S_i - S_0(\lambda)$ and $v = \frac{dS_0(\lambda)}{d\lambda} \frac{\lambda}{c}$. Then, the spectrum without the projection over the velocity vector is:
+        We define $S(t) = S_i - S_0(\lambda)$ and $D = \frac{dS_0(\lambda)}{d\lambda} \frac{\lambda}{c}$. Then, the spectrum without the projection over the velocity vector is:
 
         <img src="images/equations/eq3.png" width="230">
 
-        Where $<v, S(t)>$ is the inner product. The PCA is applied to a matrix of $S_f$.
+        Where $<D, S(t)>$ is the inner product. The PCA is applied to a matrix of $S_f$.
    
 - pca_sims_raw.ipynb:
     * PCA applied to simulated spectra without doppler correction to the wavelength.
