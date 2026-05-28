@@ -451,3 +451,30 @@ def move_sn_y(offs=0, dig=0, side='left', omit_last=False):
 
     # Return the locs
     return locs
+
+
+def build_day_ranges(step_size, num_days):
+    """
+    Divides a number of days into steps.
+
+    Parameters
+    ----------
+        step_size: int
+            Size of the steps.
+        num_days: int
+            Number of days.
+    Returns
+    -------
+        ranges: numpy.ndarray
+            Array of tuples, where each element represents the start and
+            the end of each step.
+    """
+    ranges = []
+    start = 1
+
+    while start <= num_days:
+        end = min(start + step_size - 1, num_days)
+        ranges.append((start, end))
+        start += step_size
+
+    return ranges
