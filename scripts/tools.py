@@ -538,5 +538,4 @@ def plot_PCA(wl, loadings, dates, scores, pgrams, pc_numbers, days):
             axs[i][2].set_title('Lomb-Scargle Periodogram (frequency)', size=16)
             axs[i][3].set_title('Lomb-Scargle Periodogram', size=16)
 
-    plt.subplots_adjust(hspace=0)
     plt.show()
