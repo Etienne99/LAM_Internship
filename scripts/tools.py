@@ -478,3 +478,65 @@ def build_day_ranges(step_size, num_days):
         start += step_size
 
     return ranges
+
+
+def plot_PCA(wl, loadings, dates, scores, pgrams, pc_numbers, days):
+    """
+    Plots loadings, scores and periodograms of some principal components.
+
+    Parameters
+    ----------
+        wl: numpy.ndarray
+            1-dimensional array containing the wavelength values.
+        loadings: numpy.ndarray
+            2-dimensional array that contains the loadings of each principal component.
+        dates: numpy.ndarray
+            1-dimensional array. Temporal data associated to the scores.
+        pgrams: numpy.ndarray
+            The i-th element of this array contains two arrays: the first one contains the frequencies
+            and the second one contains the associated power spectrum for the i-th principal component.
+        pc_numbers: numpy.ndarray
+            Array that contains the indices of the principal components that will be plotted. For example, if we have
+            the loadings for 20 principal components, but we only want to plot principal components 1 and 8,
+            then pc_numbers = [0, 7].
+        days: tuple
+            The first element of this tuple is the date of the beginning of the observations, the second element
+            corresponds to the end.
+    """
+
+    fig, axs = plt.subplots(len(pc_numbers), 4, figsize=(22, 3*len(pc_numbers)), squeeze=False, constrained_layout=True)
+    fig.suptitle(f'Best principal components for days {days[0]} to {days[1]}', size=18)
+
+    for i in range(len(pc_numbers)):  # iterate over the PCs that wil be plotted
+        ind = pc_numbers[i]
+        ps = pgrams[i][1]
+        freqs = pgrams[i][0]
+        # Loadings
+        axs[i][0].plot(wl, loadings[ind], color='k')
+        axs[i][0].set_xlabel(r'Wavelength [$\AA$]', size=13)
+        axs[i][0].set_ylabel(f'PC {pc_numbers[i] + 1}', size=13)
+        
+        # Scores
+        axs[i][1].scatter(dates, scores[ind])
+        axs[i][1].set_xlabel('Time', size=13)
+        axs[i][1].set_xticks(np.linspace(dates[0], dates[-1], 4))
+
+        # periodogram (frequency)
+        axs[i][2].plot(freqs / 86400, ps, color='darkred')
+        axs[i][2].set_xscale('log')
+        axs[i][2].set_yscale('log')
+        axs[i][2].set_xlabel('Frequency [Hz]', size=13)
+
+        # periodogram (period)
+        axs[i][3].plot(1 / freqs, ps, color='darkred')
+        axs[i][3].set_xscale('log')
+        axs[i][3].set_xlabel('Period [days]', size=13)
+
+        if i == 0:
+            axs[i][0].set_title('Loadings', size=16)
+            axs[i][1].set_title('Scores', size=16)
+            axs[i][2].set_title('Lomb-Scargle Periodogram (frequency)', size=16)
+            axs[i][3].set_title('Lomb-Scargle Periodogram', size=16)
+
+    plt.subplots_adjust(hspace=0)
+    plt.show()
