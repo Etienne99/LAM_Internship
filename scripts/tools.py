@@ -522,10 +522,10 @@ def plot_PCA(wl, loadings, dates, scores, pgrams, pc_numbers, days):
         axs[i][1].set_xticks(np.linspace(dates[0], dates[-1], 4))
 
         # periodogram (frequency)
-        axs[i][2].plot(freqs / 86400, ps, color='darkred')
+        axs[i][2].plot(freqs / 86400 * 10**6, ps, color='darkred')
         axs[i][2].set_xscale('log')
         axs[i][2].set_yscale('log')
-        axs[i][2].set_xlabel('Frequency [Hz]', size=13)
+        axs[i][2].set_xlabel(r'Frequency [$\mu Hz$]', size=13)
 
         # periodogram (period)
         axs[i][3].plot(1 / freqs, ps, color='darkred')
