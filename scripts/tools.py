@@ -46,8 +46,8 @@ def double_centering(matrix):
         X: numpy.ndarray
             Result of double centering of the original matrix.
     """
-    matrix_centered = matrix - np.mean(matrix, axis=1, keepdims=True)
-    matrix_centered = matrix_centered - np.mean(matrix_centered, axis=0, keepdims=True)
+    matrix_centered = matrix - np.mean(matrix, axis=0, keepdims=True)
+    matrix_centered = matrix_centered - np.mean(matrix_centered, axis=1, keepdims=True)
     return matrix_centered
 
 
