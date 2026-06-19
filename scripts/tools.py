@@ -124,7 +124,7 @@ def calculate_rv(wl, S_0, S_k, C_0):
     return c * num / den
 
 
-def calculate_pca_significance(N_r, N_c, spectra, sigma, bar=True):
+def calculate_pca_significance(N_r, N_c, wl, spectra, sigma, bar=True):
     """
     Calculates the significance of the principal components.
 
@@ -134,8 +134,12 @@ def calculate_pca_significance(N_r, N_c, spectra, sigma, bar=True):
             Number of realizations.
         N_c: int
             Number of principal components.
+        wl: numpy.ndarray
+            Wavelength array (same for every spectrum).
         spectra: numpy.ndarray
             2D array where each row is a spectrum.
+        sigma: float
+            Amount of noise added to the spectra.
         bar: bool
             True to show progress bar.
 
@@ -147,32 +151,42 @@ def calculate_pca_significance(N_r, N_c, spectra, sigma, bar=True):
             The second element of each tuple is the standard deviation
             of the dot product between the components obtained from the original matrix and the noisy ones.
     """
+    # preprocessing
+    S_f, D = subtract_v(wl, spectra, c=3e8)  # take out projection over the velocity vector
+    spectra_centered = double_centering(S_f)
+    # PCA
     pca_spec = PCA(n_components=N_c)  # create PCA object
-    pca_spec.fit_transform(spectra)  # apply PCA to the original matrix
+    pca_spec.fit_transform(spectra_centered)  # apply PCA to the original matrix
     comps = pca_spec.components_.astype(np.float32)
 
     simi_all = np.empty((N_r, N_c, N_c), dtype=np.float32)  # N_r squared matrices of N_c x N_c
 
     if bar:
         for i in tqdm(range(N_r)):  # iterate over realizations
+            # preprocessing
             spectra_noisy = spectra + np.random.normal(0, sigma, spectra.shape)  # add gaussian noise to the original data
-
+            S_f_noisy, D = subtract_v(wl, spectra_noisy, c=3e8)  # take out projection over the velocity vector
+            spectra_noisy = double_centering(S_f_noisy)
+            # PCA
             pca_noisy = PCA(n_components=N_c, svd_solver="randomized")  # apply PCA to the noisy matrix
             pca_noisy.fit(spectra_noisy)
 
             comps_noisy = pca_noisy.components_  # save the loadings
 
-            simi_all[i] = comps @ comps_noisy.T  # save dot product between original and noisy loadings
+            simi_all[i] = np.abs(comps @ comps_noisy.T)  # save dot product between original and noisy loadings
     else:
         for i in range(N_r):  # iterate over realizations
+            # preprocessing
             spectra_noisy = spectra + np.random.normal(0, sigma, spectra.shape)  # add gaussian noise to the original data
-
+            S_f_noisy, D = subtract_v(wl, spectra_noisy, c=3e8)  # take out projection over the velocity vector
+            spectra_noisy = double_centering(S_f_noisy)
+            # PCA
             pca_noisy = PCA(n_components=N_c, svd_solver="randomized")  # apply PCA to the noisy matrix
             pca_noisy.fit(spectra_noisy)
 
             comps_noisy = pca_noisy.components_  # save the loadings
 
-            simi_all[i] = comps @ comps_noisy.T  # save dot product between original and noisy loadings
+            simi_all[i] = np.abs(comps @ comps_noisy.T)  # save dot product between original and noisy loadings
     
     maxes = np.array([np.amax(s, axis=1) for s in simi_all])  # max of each row of each realization
     stats = np.array([(np.average(s), np.std(s)) for s in maxes.T])  # list of max mean and std for each PC: [(max_avg_1, max_std_1), (max_avg_2, max_std_2), ..., (max_avg_n, max_std_n)]
