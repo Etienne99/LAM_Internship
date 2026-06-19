@@ -397,7 +397,7 @@ def subtract_v(wl, spectra_matrix, c=3e8):
 
     S_t       = np.array([i - mean_spec for i in spectra_matrix])  # subtract the mean spectrum from each row of the spectra matrix
     D         = d_S0 * wl / c
-    S_f       = np.array([(i - np.dot(D, i)) * D / np.linalg.norm(D)**2 for i in S_t])  # take out projection over the velocity vector
+    S_f       = np.array([i - (np.dot(D, i) / np.linalg.norm(D)**2) * D for i in S_t])  # take out projection over the velocity vector
     return S_f, D
 
 
