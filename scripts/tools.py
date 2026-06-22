@@ -168,7 +168,7 @@ def calculate_pca_significance(N_r, N_c, wl, spectra, sigma, bar=True):
             S_f_noisy, D = subtract_v(wl, spectra_noisy, c=3e8)  # take out projection over the velocity vector
             spectra_noisy = double_centering(S_f_noisy)
             # PCA
-            pca_noisy = PCA(n_components=N_c, svd_solver="randomized")  # apply PCA to the noisy matrix
+            pca_noisy = PCA(n_components=N_c)  # apply PCA to the noisy matrix
             pca_noisy.fit(spectra_noisy)
 
             comps_noisy = pca_noisy.components_  # save the loadings
@@ -181,7 +181,7 @@ def calculate_pca_significance(N_r, N_c, wl, spectra, sigma, bar=True):
             S_f_noisy, D = subtract_v(wl, spectra_noisy, c=3e8)  # take out projection over the velocity vector
             spectra_noisy = double_centering(S_f_noisy)
             # PCA
-            pca_noisy = PCA(n_components=N_c, svd_solver="randomized")  # apply PCA to the noisy matrix
+            pca_noisy = PCA(n_components=N_c)  # apply PCA to the noisy matrix
             pca_noisy.fit(spectra_noisy)
 
             comps_noisy = pca_noisy.components_  # save the loadings
@@ -247,25 +247,6 @@ def harvey_unpacked(nu, a, b, c, d):
     return a / (f * b) / (1 + (nu / b)**c) + d
 
 
-def calculate_CCF(S_i, S_0):
-    """
-    Calculates the cross-correlation function between a measured and a reference spectrum.
-
-    Parameters
-    ----------
-        S_i: numpy.ndarray
-            Measured spectrum.
-        S_0: numpy.ndarray
-            Reference spectrum.
-    
-    Returns
-    -------
-        float:
-            Result of the cross-correlation.
-    """
-    return sum(S_i * S_0)
-
-
 def gaussian(x, A, mu, sigma, C):
     """
     Gaussian function with independent amplitude and position on the y-axis.
@@ -303,7 +284,7 @@ def calculate_lambda_vr(wl, v, c=3e8):
         v: float or numpy.ndarray
             Velocity. Must have the same shape as wl and the same units as c.
         c: float
-            Speed of light. 300000 m/s by default.
+            Speed of light. 3e8 m/s by default.
     
     Returns
     -------
@@ -329,7 +310,7 @@ def cross_correlate(S_j, shifted_mask):
     
     Returns:
     --------
-        float
+        numpy.ndarray
             The cross correlation function between the observed spectrum and the shifted mask.
 
     """
@@ -479,8 +460,8 @@ def build_day_ranges(step_size, num_days):
             Number of days.
     Returns
     -------
-        ranges: numpy.ndarray
-            Array of tuples, where each element represents the start and
+        ranges: list
+            List of tuples, where each element represents the start and
             the end of each step.
     """
     ranges = []
@@ -523,8 +504,8 @@ def plot_PCA(wl, loadings, dates, scores, pgrams, pc_numbers, days):
 
     for i in range(len(pc_numbers)):  # iterate over the PCs that wil be plotted
         ind = pc_numbers[i]
-        ps = pgrams[i][1]
-        freqs = pgrams[i][0]
+        ps = pgrams[ind][1]
+        freqs = pgrams[ind][0]
         # Loadings
         axs[i][0].plot(wl, loadings[ind], color='k')
         axs[i][0].set_xlabel(r'Wavelength [$\AA$]', size=13)
