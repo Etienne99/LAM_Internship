@@ -545,3 +545,38 @@ def plot_PCA(wl, loadings, dates, scores, corrs, pgrams, pc_numbers, days, bands
             axs[i][3].set_title('Lomb-Scargle Periodogram', size=16)
 
     plt.show()
+
+
+def calculate_chi2(k, scores, rv):
+    """
+    Calculates the chi2 statistic of a linear fit (rv = <I, x>) of the radial velocity,
+    using the scores of the first k principal components.
+
+    Parameters
+    ----------
+        k: int
+            Number of principal components used for the linear fit. The first k rows of scores will be selected.
+        scores: numpy.ndarray
+            2-dimensional array, where the i-th element is an array that contains the scores of
+            the i-th principal component.
+        rv: numpy.ndarray
+            1-dimensional array, corresponding to the radial velocities. It must have the same shape as the
+            elements of scores.
+
+    Returns
+    -------
+        chi2: numpy.ndarray
+            1-dimensional array, containing the chi2 statistic of the linear fir of rv, using the k first
+            elements of scores.
+    """
+    
+    # put the scores of the first k principal components in the columns of a matrix
+    scores_matrix = []
+    for i in range(k):
+        scores_matrix.append(scores[i])
+    scores_matrix = np.array(scores_matrix).T  # this is I in the fit, a matrix whose columns are the scores of the first k principal components
+    G = np.dot(scores_matrix.T, scores_matrix)
+    b = np.dot(scores_matrix.T, rv)
+    x = np.linalg.solve(G, b)
+    chi2 = np.linalg.norm(rv - np.dot(scores_matrix, x))**2
+    return chi2
