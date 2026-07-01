@@ -3,35 +3,6 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from sklearn.decomposition import PCA
 
-
-def RV_jup(t, A_0, A_1, P, phi, C):
-    """
-    Model for the radial velocity of the Sun due to Jupiter's
-    gravity as a sinusoid.
-
-    Parameters
-    ----------
-        t: numpy.ndarray
-            Time series.
-        A_0: float
-            Initial amplitude.
-        A_1: float
-            Amplitude drift.
-        P: float
-            Period of the sinusoid.
-        phi: float
-            Phase offset.
-        C: float
-            Vertical shift.
-
-    Returns
-    -------
-        np.array
-            Sinusoidal function.
-    """
-    return (A_0 + A_1 * t) * np.sin(2 * np.pi * t / P + phi) + C
-
-
 def double_centering(matrix):
     """ 
     Applies double centering to a given matrix.
@@ -380,99 +351,6 @@ def subtract_D(wl, spectra_matrix, c=3e8):
     D         = d_S0 * wl / c
     S_f       = np.array([i - (np.dot(D, i) / np.linalg.norm(D)**2) * D for i in S_t])  # take out projection over the velocity vector
     return S_f, D
-
-
-def move_sn_y(offs=0, dig=0, side='left', omit_last=False):
-    """
-    Move scientific notation exponent from top to the side.
-    Additionally, one can set the number of digits after the comma
-    for the y-ticks, hence if it should state 1, 1.0, 1.00 and so forth.
-    Source: https://werthmuller.org/blog/2014/move-scientific-notation/
-
-    Parameters
-    ----------
-        offs : float, optional; <0>
-            Horizontal movement additional to default.
-        dig : int, optional; <0>
-            Number of decimals after the comma.
-        side : string, optional; {<'left'>, 'right'}
-            To choose the side of the y-axis notation.
-        omit_last : bool, optional; <False>
-            If True, the top y-axis-label is omitted.
-
-    Returns
-    -------
-        locs : list
-            List of y-tick locations.
-
-    Note
-    ----
-        This is kind of a non-satisfying hack, which should be handled more
-        properly. But it works. Functions to look at for a better implementation:
-        ax.ticklabel_format
-        ax.yaxis.major.formatter.set_offset_string
-    """
-
-    # Get the ticks
-    locs, _ = plt.yticks()
-
-    # Put the last entry into a string, ensuring it is in scientific notation
-    # E.g: 123456789 => '1.235e+08'
-    llocs = '%.3e' % locs[-1]
-
-    # Get the magnitude, hence the number after the 'e'
-    # E.g: '1.235e+08' => 8
-    yoff = int(str(llocs).split('e')[1])
-
-    # If omit_last, remove last entry
-    if omit_last:
-        slocs = locs[:-1]
-    else:
-        slocs = locs
-
-    # Set ticks to the requested precision
-    form = r'$%.'+str(dig)+'f$'
-    plt.yticks(locs, list(map(lambda x: form % x, slocs/(10**yoff))))
-
-    # Define offset depending on the side
-    if side == 'left':
-        offs = -.18 - offs # Default left: -0.18
-    elif side == 'right':
-        offs = 1 + offs    # Default right: 1.0
-        
-    # Plot the exponent
-    plt.text(offs, .98, r'$\times10^{%i}$' % yoff, transform =
-            plt.gca().transAxes, verticalalignment='top')
-
-    # Return the locs
-    return locs
-
-
-def build_day_ranges(step_size, num_days):
-    """
-    Divides a number of days into steps.
-
-    Parameters
-    ----------
-        step_size: int
-            Size of the steps.
-        num_days: int
-            Number of days.
-    Returns
-    -------
-        ranges: list
-            List of tuples, where each element represents the start and
-            the end of each step.
-    """
-    ranges = []
-    start = 1
-
-    while start <= num_days:
-        end = min(start + step_size - 1, num_days)
-        ranges.append((start, end))
-        start += step_size
-
-    return ranges
 
 
 def plot_PCA(wl, loadings, dates, scores, corrs, pgrams, pc_numbers, days, bands=None):
