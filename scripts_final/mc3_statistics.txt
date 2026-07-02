@@ -2,62 +2,62 @@ Summary of posterior statistics:
 
 Parameter estimates:
  Median         Mean           Max-posterior  Mode           Parameter
- 3.0499514e-01  3.0499211e-01  3.0496232e-01  3.0482334e-01  param01
- 2.0135239e-06  2.0134831e-06  2.0134232e-06  2.0141873e-06  param02
+ 3.0499807e-01  3.0499294e-01  3.0499725e-01  3.0489888e-01  param01
+ 2.0136214e-06  2.0136898e-06  2.0134648e-06  2.0133765e-06  param02
  2.0000000e+00  2.0000000e+00  2.0000000e+00  2.0000000e+00  param03
- 1.4795948e+03  1.4796509e+03  1.4793998e+03  1.4795635e+03  param04
+ 1.4793469e+03  1.4795018e+03  1.4795425e+03  1.4789757e+03  param04
 
  Std_deviation  Parameter
- 5.8998968e-04  param01
- 6.9269780e-09  param02
+ 6.0894095e-04  param01
+ 7.0680176e-09  param02
  0.0000000e+00  param03
- 5.5779912e+00  param04
+ 5.5692635e+00  param04
 
 Central quantile credible intervals:
  2sigma_low     1sigma_low     1sigma_up      2sigma_up      Parameter
- 3.0381187e-01  3.0440112e-01  3.0558117e-01  3.0615972e-01  param01
- 1.9994324e-06  2.0066356e-06  2.0203777e-06  2.0275341e-06  param02
+ 3.0374829e-01  3.0438578e-01  3.0560129e-01  3.0618525e-01  param01
+ 1.9997290e-06  2.0066560e-06  2.0207086e-06  2.0281949e-06  param02
  2.0000000e+00  2.0000000e+00  2.0000000e+00  2.0000000e+00  param03
- 1.4686776e+03  1.4740715e+03  1.4852882e+03  1.4908988e+03  param04
+ 1.4682747e+03  1.4741393e+03  1.4850114e+03  1.4909582e+03  param04
 
 Highest-posterior-density credible intervals:
  2sigma_low     1sigma_low     1sigma_up      2sigma_up      Parameter
- 3.0380514e-01  3.0439754e-01  3.0558699e-01  3.0617014e-01  param01
- 1.9993050e-06  2.0067634e-06  2.0206443e-06  2.0274985e-06  param02
+ 3.0378929e-01  3.0439173e-01  3.0562151e-01  3.0623128e-01  param01
+ 1.9996405e-06  2.0064157e-06  2.0206529e-06  2.0280406e-06  param02
  2.0000000e+00  2.0000000e+00  2.0000000e+00  2.0000000e+00  param03
- 1.4686186e+03  1.4739829e+03  1.4853027e+03  1.4909987e+03  param04
+ 1.4681626e+03  1.4739750e+03  1.4849620e+03  1.4909919e+03  param04
 
 
 LaTeX format
 Median and 1sigma central-quantile statistics
-param01  &  $0.30500^{+0.00059}_{-0.00059}$
-param02  &  $0.0000020135^{+0.0000000069}_{-0.0000000069}$
+param01  &  $0.30500^{+0.00060}_{-0.00061}$
+param02  &  $0.0000020136^{+0.0000000071}_{-0.0000000070}$
 param03  &  $2.0$
-param04  &  $1479.6^{+5.7}_{-5.5}$
+param04  &  $1479.3^{+5.7}_{-5.2}$
 
 Median and 2sigma central-quantile statistics
 param01  &  $0.3050^{+0.0012}_{-0.0012}$
-param02  &  $0.000002014^{+0.000000014}_{-0.000000014}$
+param02  &  $0.000002014^{+0.000000015}_{-0.000000014}$
 param03  &  $2.0$
-param04  &  $1479.6^{+11.3}_{-10.9}$
+param04  &  $1479.3^{+11.6}_{-11.1}$
 
 Marginal max_posterior (mode) and 1sigma-HPD statistics
-param01  &  $0.30482^{+0.00076}_{-0.00043}$
-param02  &  $0.0000020142^{+0.0000000065}_{-0.0000000074}$
+param01  &  $0.30490^{+0.00072}_{-0.00051}$
+param02  &  $0.0000020134^{+0.0000000073}_{-0.0000000070}$
 param03  &  $2.0$
-param04  &  $1479.6^{+5.7}_{-5.6}$
+param04  &  $1479.0^{+6.0}_{-5.0}$
 
 Marginal max_posterior (mode) and 2sigma-HPD statistics
-param01  &  $0.3048^{+0.0013}_{-0.0010}$
-param02  &  $0.000002014^{+0.000000013}_{-0.000000015}$
+param01  &  $0.3049^{+0.0013}_{-0.0011}$
+param02  &  $0.000002013^{+0.000000015}_{-0.000000014}$
 param03  &  $2.0$
-param04  &  $1479.6^{+11.4}_{-10.9}$
+param04  &  $1479.0^{+12.0}_{-10.8}$
 
 
-Best-parameter's chi-squared:       58525.0676
-Best-parameter's -2*log(posterior): 58525.0676
-Bayesian Information Criterion:     58538.7292
-Reduced chi-squared:                  636.1420
-Standard deviation of residuals:  4283.2
+Best-parameter's chi-squared:       58525.0593
+Best-parameter's -2*log(posterior): 58525.0593
+Bayesian Information Criterion:     58538.7210
+Reduced chi-squared:                  636.1419
+Standard deviation of residuals:  4282.9
 
 
