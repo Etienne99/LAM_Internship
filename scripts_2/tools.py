@@ -1,0 +1,472 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from tqdm import tqdm
+from sklearn.decomposition import PCA
+
+def double_centering(matrix):
+    """ 
+    Applies double centering to a given matrix.
+    
+    Parameters
+    ----------
+        matrix: numpy.ndarray
+            Any 2D array.
+
+    Returns
+    -------
+        X: numpy.ndarray
+            Result of double centering of the original matrix.
+    """
+    matrix_centered = matrix - np.mean(matrix, axis=0, keepdims=True)
+    matrix_centered = matrix_centered - np.mean(matrix_centered, axis=1, keepdims=True)
+    return matrix_centered
+
+
+def extract_pattern(sequence, pattern):
+    """
+    Finds a certain pattern inside a string.
+    Used to extract time string from a HARPS file name.
+
+    Parameters
+    ----------
+        sequence: str
+            Any string.
+        pattern: re.Pattern
+            Pattern to search inside the string.
+
+    Returns
+    -------
+        str
+            String inside sequence that matches the pattern.
+    """
+    match = pattern.search(sequence)
+    return match.group(0) if match else None
+
+
+def calculate_lambda_corr(wl, rv_list):
+    """
+    Calculates the corrected wavelength for a measured wavelength and radial velocity.
+    
+    Parameters
+    ----------
+        wl: numpy.ndarray
+            Array of size N containing the wavelengths.
+        rv_list: numpy.ndarray
+            Array of size M containing RV measures. Units must be m/s.
+    
+    Returns
+    -------
+        numpy.ndarray
+            2D array of M rows and N columns.
+            Each row contains a list of corrected wavelengths for a certain RV value.
+    """
+    lambda_corr  = []
+    for rv in rv_list:
+        lambda_corr.append(wl * (1 - rv / 3e8))  # corrected wavelength, same units as wl
+    return np.array(lambda_corr)
+
+
+def calculate_rv(wl, S_0, S_k, C_0):
+    """
+    Template matching. Calculates the radial velocity of a certain spectrum with respect to a reference spectrum.
+    Both spectra are associated to the same wavelength array.
+
+    Parameters
+    ----------
+        wl: numpy.ndarray
+            Array containing the wavelengths.
+        S_0: numpy.ndarray
+            Array containing the reference spectrum.
+        S_k: numpy.ndarray
+            Array containing the observed spectrum.
+        C_0: float
+            Continuum level constant.
+    
+    Returns
+    -------
+        float
+            Radial velocity of the observed spectrum.
+    """
+
+    c = 3e8  # m/s
+    dS_0 = np.gradient(S_0, wl)
+    num = sum((S_k - S_0) * wl * dS_0 / (S_0 + C_0))
+    den = sum(wl**2 * dS_0**2 / (S_0 + C_0))
+    return c * num / den
+
+
+def calculate_pca_significance(N_r, N_c, wl, spectra, sigma, bar=True):
+    """
+    Calculates the significance of the principal components.
+
+    Parameters
+    ----------
+        N_r: int
+            Number of realizations.
+        N_c: int
+            Number of principal components.
+        wl: numpy.ndarray
+            Wavelength array (same for every spectrum).
+        spectra: numpy.ndarray
+            2D array where each row is a spectrum.
+        sigma: float
+            Amount of noise added to the spectra.
+        bar: bool
+            True to show progress bar.
+
+    Returns
+    -------
+        stats: numpy.ndarray
+            Array of tuples. The first element of each tuple is the average maximum value
+            of the dot product between the components obtained from the original matrix and the noisy ones.
+            The second element of each tuple is the standard deviation
+            of the dot product between the components obtained from the original matrix and the noisy ones.
+    """
+    # preprocessing
+    S_f, D = subtract_D(wl, spectra, c=3e8)  # take out projection over the velocity vector
+    spectra_centered = double_centering(S_f)
+    # PCA
+    pca_spec = PCA(n_components=N_c)  # create PCA object
+    pca_spec.fit_transform(spectra_centered)  # apply PCA to the original matrix
+    comps = pca_spec.components_.astype(np.float32)
+
+    simi_all = np.empty((N_r, N_c, N_c), dtype=np.float32)  # N_r squared matrices of N_c x N_c
+
+    if bar:
+        for i in tqdm(range(N_r)):  # iterate over realizations
+            # preprocessing
+            spectra_noisy = spectra + np.random.normal(0, sigma, spectra.shape)  # add gaussian noise to the original data
+            S_f_noisy, D = subtract_D(wl, spectra_noisy, c=3e8)  # take out projection over the velocity vector
+            spectra_noisy = double_centering(S_f_noisy)
+            # PCA
+            pca_noisy = PCA(n_components=N_c)  # apply PCA to the noisy matrix
+            pca_noisy.fit(spectra_noisy)
+
+            comps_noisy = pca_noisy.components_  # save the loadings
+
+            simi_all[i] = np.abs(comps @ comps_noisy.T)  # save dot product between original and noisy loadings
+    else:
+        for i in range(N_r):  # iterate over realizations
+            # preprocessing
+            spectra_noisy = spectra + np.random.normal(0, sigma, spectra.shape)  # add gaussian noise to the original data
+            S_f_noisy, D = subtract_D(wl, spectra_noisy, c=3e8)  # take out projection over the velocity vector
+            spectra_noisy = double_centering(S_f_noisy)
+            # PCA
+            pca_noisy = PCA(n_components=N_c)  # apply PCA to the noisy matrix
+            pca_noisy.fit(spectra_noisy)
+
+            comps_noisy = pca_noisy.components_  # save the loadings
+
+            simi_all[i] = np.abs(comps @ comps_noisy.T)  # save dot product between original and noisy loadings
+    
+    maxes = np.array([np.amax(s, axis=1) for s in simi_all])  # max of each row of each realization
+    stats = np.array([(np.average(s), np.std(s)) for s in maxes.T])  # list of max mean and std for each PC: [(max_avg_1, max_std_1), (max_avg_2, max_std_2), ..., (max_avg_n, max_std_n)]
+    return stats
+
+
+def harvey(params, nu):
+    """
+    Calculates the Harvey function (https://ui.adsabs.harvard.edu/abs/1985ESASP.235..199H/abstract).
+
+    Parameters
+    ----------
+        params: iterable
+            Parameters of the function. These are:
+                a: float
+                    Total energy.
+                b: float
+                    Turnover frequency.
+                c: float
+                    Slope of the power law.
+                d: float
+                    White noise.
+        nu: float or numpy.ndarray
+            Frequency.
+    Returns
+    -------
+        float or numpy.ndarray
+            Harvey function for the given values.
+    """
+    a, b, c, d = params
+    f = np.pi / c / np.sin(np.pi / c)  # normalization factor
+    return a / (f * b) / (1 + (nu / b)**c) + d
+
+
+def harvey_unpacked(nu, a, b, c, d):
+    """
+    Calculates the Harvey function (https://ui.adsabs.harvard.edu/abs/1985ESASP.235..199H/abstract).
+
+    Parameters
+    ----------
+        nu: float or numpy.ndarray
+            Frequency.
+        a: float
+            Total energy.
+        b: float
+            Turnover frequency.
+        c: float
+            Slope of the power law.
+        d: float
+            White noise.
+
+    Returns
+    -------
+        float or numpy.ndarray
+            Harvey function for the given values.
+    """
+    f = np.pi / c / np.sin(np.pi / c)  # normalization factor
+    return a / (f * b) / (1 + (nu / b)**c) + d
+
+
+def gaussian(x, A, mu, sigma, C):
+    """
+    Gaussian function with independent amplitude and position on the y-axis.
+    
+    Parameters
+    ----------
+        x: float or numpy.ndarray
+            Input data.
+        A: float
+            Height of the curve's peak (amplitude).
+        mu: float
+            Position of the center of the peak.
+        sigma: float
+            Standard deviation.
+        C: float
+            Position coefficient.
+    
+    Returns
+    -------
+        float or numpy.ndarray
+            Gaussian function.
+    """
+    return A * np.exp(-(x - mu)**2 / (2 * sigma**2)) + C
+
+
+def calculate_lambda_vr(wl, v, c=3e8):
+    """
+    Calculates Doppler-shifted wavelength as explained in Pepe et al. (2002).
+    https://ui.adsabs.harvard.edu/abs/2002A%26A...388..632P/abstract
+
+    Parameters
+    ----------
+        wl: float or numpy.ndarray
+            Wavelength.
+        v: float or numpy.ndarray
+            Velocity. Must have the same shape as wl and the same units as c.
+        c: float
+            Speed of light. 3e8 m/s by default.
+    
+    Returns
+    -------
+        float or numpy.ndarray
+            Doppler-shifted wavelength, same units as wl.
+    """
+
+    return wl * np.sqrt((1 - v / c) / (1 + v / c))
+
+
+def cross_correlate(S_j, shifted_mask):
+    """
+    Calculates the Cross-Correlation Function between a spectrum and
+    a series of shifted spectra.
+
+    Parameters
+    ----------
+        S_j: numpy.ndarray
+            1-dimensional array that represents an observed spectrum.
+        shifted_mask: numpy.ndarray
+            1-dimensional that represents the reference spectrum (mask),
+            shifted due to the effect of a certain value of radial velocity.
+    
+    Returns:
+    --------
+        numpy.ndarray
+            The cross correlation function between the observed spectrum and the shifted mask.
+
+    """
+
+    return S_j * shifted_mask / (np.linalg.norm(S_j) * np.linalg.norm(shifted_mask))
+
+
+def calculate_periodogram(x, y):
+    """
+    Calculates the periodogram of the function y(x).
+
+    Parameters
+    ----------
+        x: np.ndarray
+            Independent variable. Needs to be regularly spaced.
+        y: np.ndarray
+            Dependent variable (function of x). Needs to be regularly spaced.
+    
+    Returns
+    -------
+        ft: np.ndarray
+            Fast Fourier Transform of y.
+        ps: np.ndarray
+            Normalized power spectrum of y.
+        freqs: np.ndarray
+            Corresponding frequencies to the Fourier Transform.
+    """
+    N = len(y)
+    dx = x[1] - x[0]
+    
+    ft = np.fft.fft(y)
+    ps = np.abs(ft)**2 * dx / N
+    freqs = np.fft.fftfreq(N, dx)
+
+    return ft, ps, freqs
+
+
+def subtract_D(wl, spectra_matrix, c=3e8):
+    """
+    Take out the projection over the velocity vector from a matrix of spectra,
+    assuming that each spectrum is the same as the mean spectrum centered around
+    a different wavelength.
+    Detailed explanation in the readme: https://github.com/Etienne99/LAM_Internship/blob/master/README.md.
+
+    Parameters
+    ----------
+        wl: numpy.ndarray
+            1-dimensional array containing the wavelength values.
+        spectra_matrix: numpy.ndarray
+            2-dimensional array where each row is a spectrum.
+        c: float
+            The speed of light in vacuum. Default is 3e8 m/s.
+    
+    Returns
+    -------
+        S_f: numpy.ndarray
+            2-dimensional array, where each row is a spectrum after having subtracted
+            the projection over the velocity vector.
+        D: numpy.ndarray
+            Product between the derivative of the mean spectrum and the wavelength array, divided by c.
+            Has units of velocity^-1.
+    """
+    mean_spec = np.mean(spectra_matrix, axis=0)  # calculate mean spectrum (i.e. the mean flux for each wl)
+    d_S0      = np.gradient(mean_spec, wl)  # derivative of the mean spectrum
+
+    S_t       = np.array([i - mean_spec for i in spectra_matrix])  # subtract the mean spectrum from each row of the spectra matrix
+    D         = d_S0 * wl / c
+    S_f       = np.array([i - (np.dot(D, i) / np.linalg.norm(D)**2) * D for i in S_t])  # take out projection over the velocity vector
+    return S_f, D
+
+
+def plot_PCA(wl, loadings, dates, scores, corrs, pgrams, pc_numbers, days, bands=None):
+    """
+    Plots loadings, scores and periodograms of some principal components.
+
+    Parameters
+    ----------
+        wl: numpy.ndarray
+            1-dimensional array containing the wavelength values.
+        loadings: numpy.ndarray
+            2-dimensional array that contains the loadings of each principal component.
+        dates: numpy.ndarray
+            1-dimensional array. Temporal data associated to the scores.
+        scores: numpy.ndarray
+            2-dimensional array that contains the scores of each principal component.
+        corrs: numpy.ndarray
+            1-dimensional array that contains the Pearson correlation coefficient r(RV, PC) of each principal component.
+        pgrams: numpy.ndarray
+            The i-th element of this array contains two arrays: the first one contains the frequencies
+            and the second one contains the associated power spectrum for the i-th principal component.
+        pc_numbers: numpy.ndarray
+            Array that contains the indices of the principal components that will be plotted. For example, if the array of loadings has
+            the loadings for 20 principal components, but only principal components 1 and 8 are wanted for the plot,
+            then pc_numbers = [0, 7].
+        days: tuple
+            The first element of this tuple is the date of the beginning of the observations, the second element
+            corresponds to the end.
+        bands: np.ndarray
+            Array of tuples containing the information of the absorption bands to plot with the loadings.
+            For example: [('Fe I a', 443., 444., 'purple'), ('Fe I b', 448., 449., 'pink'), ('Fe I 6173A', 617.3, 617.36, 'darkred')]
+    """
+
+    fig, axs = plt.subplots(len(pc_numbers), 4, figsize=(22, 3*len(pc_numbers)), squeeze=False, constrained_layout=True)
+    fig.suptitle(f'Principal Components (time-series from {days[0]} to {days[1]})', size=18)
+
+    for i in range(len(pc_numbers)):  # iterate over the PCs that wil be plotted
+        ind = pc_numbers[i]
+        ps = pgrams[ind][1]
+        freqs = pgrams[ind][0]
+        # Loadings
+        for k in bands:
+            axs[i][0].axvspan(xmin=k['start']*10, xmax=k['end']*10, color=k['color'], label=k['name'], alpha=.3)
+        axs[i][0].plot(wl, loadings[ind], color='k')
+        axs[i][0].set_xlabel(r'Wavelength [$\AA$]', size=13)
+        axs[i][0].set_ylabel(f'PC {pc_numbers[i] + 1}', size=13)
+        
+        # Scores
+        axs[i][1].scatter(dates, scores[ind])
+        axs[i][1].scatter(np.median(dates), np.median(scores), color='w', marker='.', label=f'r(PC{i + 1}, RV) = {corrs[ind]:.2f}', zorder=-1)  # show correlation coefficient
+        axs[i][1].set_xlabel('Time', size=13)
+        axs[i][1].set_xticks(np.linspace(dates[0], dates[-1], 4))
+        axs[i][1].legend()
+
+        # periodogram (frequency)
+        axs[i][2].plot(freqs / 86400 * 10**6, ps, color='darkred')
+        axs[i][2].set_xscale('log')
+        axs[i][2].set_yscale('log')
+        axs[i][2].set_xlabel(r'Frequency [$\mu Hz$]', size=13)
+
+        # periodogram (period)
+        axs[i][3].plot(1 / freqs, ps, color='darkred')
+        axs[i][3].set_xscale('log')
+        axs[i][3].set_xlabel('Period [days]', size=13)
+
+        if i == 0:
+            axs[i][0].set_title('Loadings', size=16)
+            axs[i][1].set_title('Scores', size=16)
+            axs[i][2].set_title('Lomb-Scargle Periodogram (frequency)', size=16)
+            axs[i][3].set_title('Lomb-Scargle Periodogram', size=16)
+
+    plt.show()
+
+
+def calculate_chi2(k, scores, rv):
+    """
+    Calculates the chi2 statistic of a linear fit (rv = <I, x>) of the radial velocity,
+    using the scores of the first k principal components.
+
+    Parameters
+    ----------
+        k: int
+            Number of principal components used for the linear fit. The first k rows of scores will be selected.
+        scores: numpy.ndarray
+            2-dimensional array, where the i-th element is an array that contains the scores of
+            the i-th principal component.
+        rv: numpy.ndarray
+            1-dimensional array, corresponding to the radial velocities. It must have the same shape as the
+            elements of scores.
+
+    Returns
+    -------
+        chi2: numpy.ndarray
+            1-dimensional array, containing the chi2 statistic of the linear fir of rv, using the k first
+            elements of scores.
+    """
+    
+    # put the scores of the first k principal components in the columns of a matrix
+    scores_matrix = []
+    for i in range(k):
+        scores_matrix.append(scores[i])
+    scores_matrix = np.array(scores_matrix).T  # this is I in the fit, a matrix whose columns are the scores of the first k principal components
+    G = np.dot(scores_matrix.T, scores_matrix)
+    b = np.dot(scores_matrix.T, rv)
+    x = np.linalg.solve(G, b)
+    chi2 = np.linalg.norm(rv - np.dot(scores_matrix, x))**2
+    return chi2
+
+def projection(a, b):
+    """
+    Calculates the projection of the vector a onto the vector b.
+    
+    Parameters
+    ----------
+        a: numpy.ndarray
+
+        b: numpy.ndarray
+    """
+    return (np.dot(a, b) / np.dot(b, b)) * b
