@@ -472,21 +472,18 @@ def projection(a, b):
     return (np.dot(a, b) / np.dot(b, b)) * b
 
 
-def cov(a, b, t):
+def cov(a, b):
     """
     Calculates the covariance between two vectors a and b.
     """
     mean_a = np.mean(a)
     mean_b = np.mean(b)
     output = []
-    t_kl = []
 
-    for k in range(len(t)):
-        for l in range(len(t)):
-            c = (a[k] - mean_a) * (b[l] - mean_b)
-            t_kl.append(np.abs(t[k] - t[l]))
+    for k in a:
+        for l in b:
+            c = (k - mean_a) * (l - mean_b)
             output.append(c)
 
-    t_kl = np.array(t_kl)
     output = np.array(output)
-    return t_kl, output
+    return output
