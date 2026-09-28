@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from sklearn.decomposition import PCA
+import torch
 
 def double_centering(matrix):
     """ 
@@ -487,3 +488,50 @@ def cov(a, b):
 
     output = np.array(output)
     return output
+
+
+# Function to evaluate a dataset
+def evaluate_model(data_loader, model, criterion):
+
+    model.eval()
+    
+    all_predictions = []
+    all_targets = []
+    all_loss = []
+    sample_loss = 0.0
+    with torch.no_grad():
+        for X_batch, y_batch in data_loader:
+            y_pred = model(X_batch)
+
+            all_predictions.append(y_pred)
+            all_targets.append(y_batch)
+
+            loss = criterion(y_pred, y_batch)
+            sample_loss += loss.item()
+    sample_loss /= len(data_loader)
+    # Combine all batches
+    y_pred = torch.cat(all_predictions).squeeze().numpy()
+    y_true = torch.cat(all_targets).squeeze().numpy()
+
+    # Metrics
+    #mse = np.mean((y_pred - y_true) ** 2)
+    #mae = np.mean(np.abs(y_pred - y_true))
+    #rmse = np.sqrt(mse)
+    #r2 = r2_score(y_true, y_pred)
+
+    return y_true, y_pred, y_true-y_pred, sample_loss
+
+
+def plot_true_vs_pred(true, pred, ax, color):
+    ax.scatter(true, pred, alpha=0.6, label='Model results', color=color)
+
+    # Perfect-prediction line
+    min_val = min(true.min(), pred.min())
+    max_val = max(true.max(), pred.max())
+    ax.plot([min_val, max_val], [min_val, max_val], '--', color='k', label='Ideal case')
+
+    ax.set_xlabel('True RV [m/s]', size=13)
+    ax.set_ylabel('Predicted RV [m/s]', size=13)
+    ax.grid(True)
+    #ax.axis('equal')
+    ax.legend()
