@@ -494,32 +494,42 @@ def cov(a, b):
 def evaluate_model(data_loader, model, criterion):
 
     model.eval()
-    
+
     all_predictions = []
     all_targets = []
-    all_loss = []
-    sample_loss = 0.0
+
+    total_loss = 0.0
+    total_samples = 0
+
     with torch.no_grad():
+
         for X_batch, y_batch in data_loader:
+
             y_pred = model(X_batch)
 
+            # Store predictions and targets
             all_predictions.append(y_pred)
             all_targets.append(y_batch)
 
+            # Loss
             loss = criterion(y_pred, y_batch)
-            sample_loss += loss.item()
-    sample_loss /= len(data_loader)
-    # Combine all batches
-    y_pred = torch.cat(all_predictions).squeeze().numpy()
-    y_true = torch.cat(all_targets).squeeze().numpy()
 
-    # Metrics
-    #mse = np.mean((y_pred - y_true) ** 2)
-    #mae = np.mean(np.abs(y_pred - y_true))
-    #rmse = np.sqrt(mse)
-    #r2 = r2_score(y_true, y_pred)
+            batch_size = X_batch.size(0)
 
-    return y_true, y_pred, y_true-y_pred, sample_loss
+            total_loss += loss.item() * batch_size
+            total_samples += batch_size
+
+    # Average loss over all samples
+    average_loss = total_loss / total_samples
+
+    # Combine batches
+    y_pred = torch.cat(all_predictions, dim=0).squeeze(-1).numpy()
+    y_true = torch.cat(all_targets, dim=0).squeeze(-1).numpy()
+
+    # Residuals
+    residuals = y_true - y_pred
+
+    return y_true, y_pred, residuals, average_loss
 
 
 def plot_true_vs_pred(true, pred, ax, color):
