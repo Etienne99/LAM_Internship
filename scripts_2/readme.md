@@ -75,3 +75,5 @@ Files content:
     - The standard deviation of the residuals is $0.159 \pm 0.030$ m/s.
 
 Results from methods 2, 3 and 4 are similar.
+
+The results may vary slightly when using a different TS as reference (results here are from using TS7).
