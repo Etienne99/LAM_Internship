@@ -43,6 +43,7 @@ Files content:
     - Trains the model using the scores of a selected TS, obtaining the parameter vector $\alpha$.
     - Tests the model using that same $\alpha$ on the corresponding scores of the other TS.
     - This method is the most rigid, and gives the worst results compared to the other ones.
+    - The standard deviation of the residuals (+- the mean of the error bars over all TS) is $0.287 \pm 0.061$ m/s.
 
 2. linear_testing_2.ipynb:
     - Splits a chosen TS in two halves: TSXA and TSXB, where X is the number of the selected TS.
@@ -53,6 +54,7 @@ Files content:
     - Calculates the pseudo-scores of TSXB and the other TS, using the loadings of TSXA.
     - Tests the model on TSXB and the other TS.
     - This method has some rigidness (as $\alpha$ is fixed) and gives good results.
+    - The standard deviation of the residuals is $0.161 \pm 0.034$ m/s.
 
 3. linear_testing_3.ipynb:
     - Splits a chosen TS in two halves: TSXA and TSXB.
@@ -62,6 +64,7 @@ Files content:
     - Trains a different $\alpha$ for each TS, using the corresponding pseudo-scores.
     - Tests each $\alpha$ using the test sample of the corresponding TS.
     - This method is flexible (as each TS has a different $\alpha$) and gives good results.
+    - The standard deviation of the residuals is $0.160 \pm 0.030$ m/s.
 
 4. linear_testing_4.ipynb:
     - Preprocessing and PCA are applied to each TS.
@@ -69,5 +72,6 @@ Files content:
     - Uses the scores of each TS to train the model, giving a different $\alpha$ for each TS.
     - Tests each $\alpha$ using the test sample of the corresponding TS.
     - This is the most flexible method, and gives good results.
+    - The standard deviation of the residuals is $0.159 \pm 0.030$ m/s.
 
 Results from methods 2, 3 and 4 are similar.
